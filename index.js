@@ -9,6 +9,7 @@ const apiRoute = require('./route/api');
 /*
  *  链接mongodb数据库
  */
+
 mongoose.connect('mongodb://localhost/starkdb');
 const db = mongoose.connection;
 db.on('error', (err) => {
