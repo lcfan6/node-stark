@@ -1,7 +1,7 @@
 function enforceType(type) {
   return async (ctx, next) => {
     try {
-      if (ctx.method === 'POST' && ctx.get('Content-Type').indexOf(type) === -1) {
+      if (ctx.get('Content-Type').indexOf(type) === -1) {
         ctx.status = 400;
         return;
       }
