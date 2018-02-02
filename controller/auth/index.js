@@ -50,5 +50,5 @@ exports.check = async (ctx, next) => {
     };
     return;
   }
-  next();
+  await next();
 };
