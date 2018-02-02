@@ -150,6 +150,6 @@ UserSchema.statics.logout = function logout(token) {
   });
 };
 
-const UserModel = mongoose.model('user', UserSchema);
+const UserModel = mongoose.model('User', UserSchema);
 
 module.exports = UserModel;
