@@ -54,6 +54,8 @@ exports.check = async (ctx, next) => {
       };
       return;
     }
+    const userInfo = resModel.data;
+    ctx.state.userInfo = userInfo;
     await next();
   } catch (err) {
     ctx.throw(500);
