@@ -26,14 +26,20 @@ function resUser(user) {
   };
 }
 
+function generateToken() {
+  return uuid().replace(/-/g, () => '');
+}
+
 UserSchema.statics.register = function register(userid, password, username) {
   return new Promise(async (resolve, reject) => {
     if (!userid || !password) {
       reject(new Error('userid, password is required.'));
+      return;
     }
     const reg = /[^0-9A-z.@]/;
     if (reg.test(userid) || reg.test(password)) {
       reject(new Error('userid, password can only contain 0-9A-Z.@'));
+      return;
     }
     // eslint-disable-next-line
     const queryResult = await UserModel.find({ userid });
@@ -43,6 +49,7 @@ UserSchema.statics.register = function register(userid, password, username) {
         msg: 'userid existed',
         error: 1,
       });
+      return;
     }
 
     // eslint-disable-next-line
@@ -50,7 +57,7 @@ UserSchema.statics.register = function register(userid, password, username) {
       userid,
       username: username || generateUsername(),
       password,
-      token: uuid(),
+      token: generateToken(),
       register_date: parseInt(Date.now() / 1000, 10),
     });
     await userObject.save();
@@ -66,6 +73,7 @@ UserSchema.statics.login = function login(userid, password) {
   return new Promise(async (resolve, reject) => {
     if (!userid || !password) {
       reject(new Error('userid, password is needed'));
+      return;
     }
     // eslint-disable-next-line
     const queryResult = await UserModel.find({ userid });
@@ -75,6 +83,7 @@ UserSchema.statics.login = function login(userid, password) {
         msg: 'no user found',
         error: 1,
       });
+      return;
     }
     const userObject = queryResult[0];
     if (userObject.password !== password) {
@@ -83,8 +92,9 @@ UserSchema.statics.login = function login(userid, password) {
         msg: 'wrong password',
         error: 1,
       });
+      return;
     }
-    userObject.token = uuid();
+    userObject.token = generateToken();
     await userObject.save();
     resolve({
       data: resUser(userObject),
@@ -102,6 +112,7 @@ UserSchema.statics.check = function check(token) {
         msg: 'invalid token',
         error: 1,
       });
+      return;
     }
     // eslint-disable-next-line
     const queryResult = await UserModel.find({ token });
@@ -111,6 +122,7 @@ UserSchema.statics.check = function check(token) {
         msg: 'invalid token',
         error: 1,
       });
+      return;
     }
     const userObject = queryResult[0];
     resolve({
@@ -129,6 +141,7 @@ UserSchema.statics.logout = function logout(token) {
         msg: 'invalid token',
         error: 1,
       });
+      return;
     }
     // eslint-disable-next-line
     const queryResult = await UserModel.find({ token });
@@ -138,6 +151,7 @@ UserSchema.statics.logout = function logout(token) {
         msg: 'invalid token',
         error: 1,
       });
+      return;
     }
     const userObject = queryResult[0];
     userObject.token = '';

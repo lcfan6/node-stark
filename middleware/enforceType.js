@@ -1,10 +1,14 @@
 function enforceType(type) {
   return async (ctx, next) => {
-    if (ctx.method === 'POST' && ctx.get('Content-Type').indexOf(type) === -1) {
-      ctx.throw(400);
-      return;
+    try {
+      if (ctx.method === 'POST' && ctx.get('Content-Type').indexOf(type) === -1) {
+        ctx.status = 400;
+        return;
+      }
+      await next();
+    } catch (err) {
+      ctx.throw(500);
     }
-    await next();
   };
 }
 
