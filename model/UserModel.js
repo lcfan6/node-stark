@@ -121,6 +121,35 @@ UserSchema.statics.check = function check(token) {
   });
 };
 
+UserSchema.statics.logout = function logout(token) {
+  return new Promise(async (resolve) => {
+    if (!token) {
+      resolve({
+        data: null,
+        msg: 'invalid token',
+        error: 1,
+      });
+    }
+    // eslint-disable-next-line
+    const queryResult = await UserModel.find({ token });
+    if (!queryResult.length) {
+      resolve({
+        data: null,
+        msg: 'invalid token',
+        error: 1,
+      });
+    }
+    const userObject = queryResult[0];
+    userObject.token = '';
+    await userObject.save();
+    resolve({
+      data: null,
+      msg: 'success',
+      error: 0,
+    });
+  });
+};
+
 const UserModel = mongoose.model('user', UserSchema);
 
 module.exports = UserModel;

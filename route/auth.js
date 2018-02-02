@@ -7,7 +7,7 @@ router.get('/test', async (ctx) => {
   ctx.body = 'It works.';
 });
 router.post('/login', authController.login);
-
 router.post('/register', authController.register);
+router.get('/logout', authController.logout);
 
 module.exports = router;
