@@ -176,6 +176,36 @@ UserSchema.statics.logout = function logout(token) {
   });
 };
 
+UserSchema.statics.addPhoto = function addPhoto(userid, imgUrl) {
+  class PhotoObject {
+    constructor(_imgUrl) {
+      this.imgToken = generateToken();
+      this.create_time = generateTimestamp();
+      this.imgUrl = _imgUrl;
+      this.beautyScore = null;
+    }
+  }
+  return new Promise(async (resolve, reject) => {
+    // eslint-disable-next-line
+    const queryResult = await UserModel.find({
+      userid,
+    });
+    if (!queryResult.length) {
+      reject(new Error('cannot find userid from db'));
+      return;
+    }
+    const userObject = queryResult[0];
+    const photoObj = new PhotoObject(imgUrl);
+    userObject.photos.push(photoObj);
+    await userObject.save();
+    resolve({
+      data: photoObj,
+      msg: 'success',
+      error: 1,
+    });
+  });
+};
+
 const UserModel = mongoose.model('User', UserSchema);
 
 module.exports = UserModel;
