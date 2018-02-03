@@ -2,14 +2,6 @@ const mongoose = require('mongoose');
 const _ = require('lodash');
 const uuid = require('uuid/v4');
 
-const UserSchema = mongoose.Schema({
-  userid: String,
-  username: String,
-  password: String,
-  register_date: Number, // 精确到秒
-  token: String,
-});
-
 const usernameMap = ['诸葛亮', '小乔', '西施', '大师傅', '李白'];
 
 function generateUsername() {
@@ -26,9 +18,29 @@ function resUser(user) {
   };
 }
 
+function generateTimestamp() {
+  return parseInt(Date.now() / 1000, 10);
+}
+
 function generateToken() {
   return uuid().replace(/-/g, () => '');
 }
+
+const UserSchema = mongoose.Schema({
+  userid: String,
+  username: String,
+  password: String,
+  register_date: Number, // 精确到秒
+  token: String,
+  photos: [
+    {
+      imgToken: String,
+      create_time: String,
+      imgUrl: String,
+      beautyScore: Number,
+    },
+  ],
+});
 
 UserSchema.statics.register = function register(userid, password, username) {
   return new Promise(async (resolve, reject) => {
@@ -58,7 +70,7 @@ UserSchema.statics.register = function register(userid, password, username) {
       username: username || generateUsername(),
       password,
       token: generateToken(),
-      register_date: parseInt(Date.now() / 1000, 10),
+      register_date: generateTimestamp(),
     });
     await userObject.save();
     resolve({
