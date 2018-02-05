@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const uuid = require('uuid/v4');
+const axios = require('axios');
 
 const usernameMap = ['诸葛亮', '小乔', '西施', '大师傅', '李白'];
 
@@ -24,6 +25,15 @@ function generateTimestamp() {
 
 function generateToken() {
   return uuid().replace(/-/g, () => '');
+}
+
+class PhotoObject {
+  constructor(_imgUrl) {
+    this.imgToken = generateToken();
+    this.create_time = generateTimestamp();
+    this.imgUrl = _imgUrl;
+    this.beautyScore = null;
+  }
 }
 
 const UserSchema = mongoose.Schema({
@@ -177,14 +187,6 @@ UserSchema.statics.logout = function logout(token) {
 };
 
 UserSchema.statics.addPhoto = function addPhoto(userid, imgUrl) {
-  class PhotoObject {
-    constructor(_imgUrl) {
-      this.imgToken = generateToken();
-      this.create_time = generateTimestamp();
-      this.imgUrl = _imgUrl;
-      this.beautyScore = null;
-    }
-  }
   return new Promise(async (resolve, reject) => {
     // eslint-disable-next-line
     const queryResult = await UserModel.find({
@@ -201,7 +203,72 @@ UserSchema.statics.addPhoto = function addPhoto(userid, imgUrl) {
     resolve({
       data: photoObj,
       msg: 'success',
-      error: 1,
+      error: 0,
+    });
+  });
+};
+
+UserSchema.statics.getImg = function getImg(imgToken) {
+  return new Promise(async (resolve, reject) => {
+    if (!imgToken) {
+      reject(new Error('Invalid imgToken'));
+      return;
+    }
+    // eslint-disable-next-line
+    const queryResult = await UserModel.find({
+      'photos.imgToken': imgToken,
+    });
+    if (!queryResult.length) {
+      reject(new Error('Invalid imgToken'));
+      return;
+    }
+    const userObject = queryResult[0];
+    const photosArray = userObject.photos;
+    if (!Array.isArray(photosArray)) {
+      reject(new Error('Invalid imgToken'));
+      return;
+    }
+    let currentPhoto;
+    for (let i = 0; i < photosArray.length; i += 1) {
+      if (photosArray[i].imgToken === imgToken) {
+        currentPhoto = photosArray[i];
+        break;
+      }
+    }
+    if (!currentPhoto) {
+      reject(new Error('Invalid imgToken'));
+      return;
+    }
+    resolve({
+      data: currentPhoto,
+      msg: 'success',
+      error: 0,
+    });
+  });
+};
+
+UserSchema.statics.getRate = function getRate(imgToken) {
+  return new Promise(async (resolve, reject) => {
+    if (!imgToken) {
+      reject(new Error('Invalid imgToken'));
+      return;
+    }
+    // eslint-disable-next-line
+    const resModel = await UserModel.getImg(imgToken);
+    // const resBaidu = await axios({
+    //   method: 'POST',
+    //   url: 'https://api-cn.faceplusplus.com/facepp/v3/detect',
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data',
+    //   },
+    //   data: {
+
+    //   }
+    // });
+    resolve({
+      data: currentPhoto,
+      msg: 'success',
+      error: 0,
     });
   });
 };
